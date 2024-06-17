@@ -4,6 +4,9 @@
 using System;
 using System.Drawing;
 using System.Text;
+using System.IO;
+using System.Reflection;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ConsoleApplicationTest
 {
@@ -25,6 +28,47 @@ namespace ConsoleApplicationTest
             Y = y;
         }
     }
+
+    static class Logger
+    {
+        // Статический метод записи строки в файл лога без переноса
+  /*      public static void Write(string text)
+        {
+            using (StreamWriter sw = new StreamWriter(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log.txt", true))
+            {
+                sw.Write(text);
+            }
+        }*/
+
+        // Статический метод записи строки в файл лога с переносом
+        public static void WriteLine(string message)
+        {
+            using (StreamWriter sw = new StreamWriter(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log.txt", true))
+            {
+                [STAThread]
+                static void Main(string[] args, StreamWriter sw, string message)
+                {
+                    try
+                    {
+                        //Write a line of text
+                        sw.WriteLine(String.Format("{0,-23} {1}", DateTime.Now.ToString() + ":", message));
+                        //Close the file
+                        sw.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Exception: " + e.Message);
+                    }
+                    finally
+                    {
+                        Console.WriteLine("Executing finally block.");
+                    }
+                }               
+            }
+        }
+
+    }
+
 
     ///Цвет
     public class ColorRGB
@@ -98,9 +142,7 @@ namespace ConsoleApplicationTest
             byte b = slateBlue.B;
             byte r = slateBlue.R;
             byte a = slateBlue.A;
-            string text = String.Format("Slate Blue has these ARGB values: Alpha:{0}, " +
-                "red:{1}, green: {2}, blue {3}", new object[] { a, r, g, b });
-            object value = e.Graphics.DrawString(text,
+            object value = e.Graphics.DrawString(Text,
                 new Font(this.Font, FontStyle.Italic),
                 new SolidBrush(slateBlue),
                 new RectangleF(new PointF(0.0F, 0.0F), this.Size));
